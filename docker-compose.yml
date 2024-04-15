@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: nguc
+      MYSQL_USER: iris
+      MYSQL_PASSWORD: 123123
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis_data:/data
+    restart: unless-stopped
+
+  # mongodb:
+  #   image: mongo:latest
+  #   container_name: mongodb
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - ./mongodb_data/mongo-initdb.d/:/docker-entrypoint-initdb.d/
+  #   restart: unless-stopped
+  
+  # 配置中心
+  rnacos:
+    image: qingpan/rnacos:stable
+    container_name: rnacos
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "10848:10848"
+    restart: unless-stopped
+
+  # 服务监控
+  # uptime_kuma:
+  #   image: louislam/uptime-kuma
+  #   container_name: uptime_kuma
+  #   ports:
+  #     - "3010:3001"
+  #   restart: unless-stopped
+  
