@@ -50,4 +50,12 @@ services:
   #   ports:
   #     - "3010:3001"
   #   restart: unless-stopped
-  
+
+  # gitlab ci/cd runner
+  # runner:
+  # image: gitlab/gitlab-runner:latest
+  # container_name: gitlab-runner
+  # restart: unless-stopped
+  # volumes:
+  #   - ./gitlab-runner/config:/etc/gitlab-runner # 挂载配置文件
+  #   - /var/run/docker.sock:/var/run/docker.sock # 如果你希望在 runner 中调用主机的 docker engine，可以在这里配置映射
