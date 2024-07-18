@@ -1,0 +1,74 @@
+# `sheldon` configuration file
+# ----------------------------
+#
+# You can modify this file directly or you can use one of the following
+# `sheldon` commands which are provided to assist in editing the config file:
+#
+# - `sheldon add` to add a new plugin to the config file
+# - `sheldon edit` to open up the config file in the default editor
+# - `sheldon remove` to remove a plugin from the config file
+#
+# See the documentation for more https://github.com/rossmacarthur/sheldon#readme
+
+shell = "zsh"
+
+[templates]
+defer = "{% for file in files %} zsh-defer source \"{{ file }}\"\n{% endfor %}"
+# PATH = 'export PATH="{{ dir }}:$PATH"'
+# fpath = 'fpath=( "{{ dir }}" $fpath )'
+# path = 'path=( "{{ dir }}" $path )'
+# source = {value = 'source "{{ file }}"', each = true}
+
+[plugins]
+
+[plugins.zsh-defer]
+github = "romkatv/zsh-defer"
+
+[plugins.ohmyzsh-lib]
+dir = "lib"
+github = "ohmyzsh/ohmyzsh"
+use = ["{completion,history,key-bindings,git,theme-and-appearance}.zsh"]
+
+[plugins.ohmyzsh-plugin]
+apply = ["defer"]
+dir = "plugins"
+github = "ohmyzsh/ohmyzsh"
+use = ["{docker-compose,kubectl}/*.plugin.zsh"]
+
+[plugins.zsh-completions]
+apply = ["defer"]
+github = "marlonrichert/zsh-completions"
+
+[plugins.zsh-autocomplete]
+apply = ["defer"]
+github = "marlonrichert/zsh-autocomplete"
+
+# [plugins.fzf-tab]
+# github = "Aloxaf/fzf-tab"
+# apply = ["defer"]
+
+[plugins.zsh-autosuggestions]
+apply = ["defer"]
+github = "zsh-users/zsh-autosuggestions"
+use = ["{{ name }}.zsh"]
+
+[plugins.zsh-history-substring-search]
+github = "zsh-users/zsh-history-substring-search"
+
+# [plugins.zsh-syntax-highlighting]
+# github = "zsh-users/zsh-syntax-highlighting"
+
+[plugins.fast-syntax-highlighting]
+github = "zdharma-continuum/fast-syntax-highlighting"
+
+[plugins.alias-tips]
+apply = ["defer"]
+github = "djui/alias-tips"
+
+[plugins.cd-ls]
+apply = ["defer"]
+github = "zshzoo/cd-ls"
+
+[plugins.zsh-eza]
+apply = ["defer"]
+github = "z-shell/zsh-eza"
