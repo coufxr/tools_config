@@ -176,10 +176,12 @@ pacman -S base base-devel vim git wget
 - `bottom` 用于终端的可定制的跨平台图形化进程/系统监视器: <https://github.com/ClementTsang/bottom>
 - `procs` 现代的 `ps` 替代品: <https://github.com/dalance/procs>
 - `neofetch` 命令行系统信息工具: <https://github.com/dylanaraps/neofetch>
-
+- `yazi` 极速终端文件管理器: <https://github.com/sxyazi/yazi>
+ 
 终端美化:
 
 - `starship` 轻量、迅速、客制化的高颜值终端: <https://starship.rs/zh-CN/>
+- `sheldon` zsh插件管理器: <https://github.com/rossmacarthur/sheldon>
 
 ### 新建账户
 
