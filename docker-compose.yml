@@ -1,18 +1,20 @@
 version: '3.8'
-
 services:
   mysql:
+    user: "1000"  # 规避权限问题 wsl 用户的id
     image: mysql:latest
     container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: nguc
-      MYSQL_USER: iris
-      MYSQL_PASSWORD: 123123
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=nguc
+      - MYSQL_USER=iris
+      - MYSQL_PASSWORD=123123
+      - TZ=Asia/Shanghai
     ports:
       - "3306:3306"
     volumes:
       - ./mysql_data:/var/lib/mysql
+    privileged: true # 启用特权模式
     restart: unless-stopped
 
   redis:
@@ -20,19 +22,12 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
+    environment:
+      - TZ=Asia/Shanghai
     volumes:
       - ./redis_data:/data
     restart: unless-stopped
 
-  # mongodb:
-  #   image: mongo:latest
-  #   container_name: mongodb
-  #   ports:
-  #     - "27017:27017"
-  #   volumes:
-  #     - ./mongodb_data/mongo-initdb.d/:/docker-entrypoint-initdb.d/
-  #   restart: unless-stopped
-  
   # 配置中心
   rnacos:
     image: qingpan/rnacos:stable
@@ -41,6 +36,13 @@ services:
       - "8848:8848"
       - "9848:9848"
       - "10848:10848"
+    volumes:
+    - ./rnacos_data/:/io:rw
+    environment:
+      - RNACOS_INIT_ADMIN_USERNAME=admin
+      - RNACOS_INIT_ADMIN_PASSWORD=admin
+      - RNACOS_HTTP_PORT=8848
+      - TZ=Asia/Shanghai
     restart: unless-stopped
 
   # 服务监控
@@ -50,12 +52,11 @@ services:
   #   ports:
   #     - "3010:3001"
   #   restart: unless-stopped
-
-  # gitlab ci/cd runner
-  # runner:
-  # image: gitlab/gitlab-runner:latest
-  # container_name: gitlab-runner
-  # restart: unless-stopped
-  # volumes:
-  #   - ./gitlab-runner/config:/etc/gitlab-runner # 挂载配置文件
-  #   - /var/run/docker.sock:/var/run/docker.sock # 如果你希望在 runner 中调用主机的 docker engine，可以在这里配置映射
+  
+  #  runner:
+  #  image: gitlab/gitlab-runner:latest
+  #  container_name: gitlab-runner
+  #  restart: unless-stopped
+  #  volumes:
+  #    - ./config/gitlab-runner:/etc/gitlab-runner # 挂载配置文件
+  #    - /var/run/docker.sock:/var/run/docker.sock # 如果你希望在 runner 中调用主机的 docker engine，可以在这里配置映射
