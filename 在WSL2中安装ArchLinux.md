@@ -151,13 +151,13 @@ Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch
 
 问题:
 > error: archlinuxcn-keyring: Signature from "Jiachen YANG (Arch Linux Packager Signing Key) " is marginal trust  
-> <https://www.archlinuxcn.org/archlinuxcn-keyring-manually-trust-farseerfc-key/>
+> <https://www.archlinuxcn.org/archlinuxcn-keyring-manually-trust-farseerfc-key/>  
+> ``` pacman-key --lsign-key "farseerfc@archlinux.org" ```  
 
 ```bash
 pacman -Syy
 pacman-key --init
 pacman-key --populate
-pacman-key --lsign-key "farseerfc@archlinux.org"
 pacman -S archlinuxcn-keyring
 pacman -S base base-devel vim git wget
 ```
@@ -167,7 +167,7 @@ pacman -S base base-devel vim git wget
 建议安装:
 
 - `paru` 基于 Yay 的新 AUR 助手: <https://github.com/Morganamilo/paru>
-- `zsh`
+- `zsh` (chsh -s /usr/bin/zsh)
 - `eza` 现代的 `ls` 替代品: <https://github.com/eza-community/eza>
 - `bat` 类似 cat，但带有 git 集成和语法高亮: <https://github.com/sharkdp/bat>
 
@@ -177,6 +177,7 @@ pacman -S base base-devel vim git wget
 - `procs` 现代的 `ps` 替代品: <https://github.com/dalance/procs>
 - `neofetch` 命令行系统信息工具: <https://github.com/dylanaraps/neofetch>
 - `yazi` 极速终端文件管理器: <https://github.com/sxyazi/yazi>
+- `fzf`
  
 终端美化:
 
@@ -206,18 +207,21 @@ passwd <用户名>
 vim /etc/sudoers
 ```
 
-取消 `wheel ALL=(ALL) ALL`的注释
+取消 `%wheel ALL=(ALL) ALL` 的注释
 
-到此为止已经完成了`Archlinux`的配置
+到此为止已经完成了 `Archlinux` 的配置
 
 ## 重要
 
-`wsl` 会默认以`root`用户登录`Archlinux`，所以需要修改`Archlinux`的默认用户
+`wsl` 会默认以 `root` 用户登录 `Archlinux` ，所以需要修改 `Archlinux` 的默认用户
 
 需要在 `/etc/wsl.conf` 中添加以下内容:
 
 ```text
 # Set the user when launching a distribution with WSL.
+[boot]
+systemd=true
+
 [user]
 default = <用户名>
 ```
