@@ -13,13 +13,16 @@
 shell = "zsh"
 
 [templates]
-defer = "{% for file in files %} zsh-defer source \"{{ file }}\"\n{% endfor %}"
+defer = "{{ hooks?.pre | nl }}{% for file in files %}zsh-defer source \"{{ file }}\"\n{% endfor %}{{ hooks?.post | nl }}"
 # PATH = 'export PATH="{{ dir }}:$PATH"'
 # fpath = 'fpath=( "{{ dir }}" $fpath )'
 # path = 'path=( "{{ dir }}" $path )'
 # source = {value = 'source "{{ file }}"', each = true}
 
 [plugins]
+
+[plugins.compinit]
+inline = "autoload -Uz compinit && compinit"
 
 [plugins.zsh-defer]
 github = "romkatv/zsh-defer"
@@ -35,17 +38,23 @@ dir = "plugins"
 github = "ohmyzsh/ohmyzsh"
 use = ["{docker-compose,kubectl}/*.plugin.zsh"]
 
+[plugins.fzf]
+github = "junegunn/fzf"
+dir = "shell"
+use = ["*.zsh"]
+apply = ["defer"]
+
+[plugins.fzf-tab]
+github = "Aloxaf/fzf-tab"
+apply = ["defer"]
+
 [plugins.zsh-completions]
 apply = ["defer"]
-github = "marlonrichert/zsh-completions"
+github = "zsh-users/zsh-completions"
 
-[plugins.zsh-autocomplete]
-apply = ["defer"]
-github = "marlonrichert/zsh-autocomplete"
-
-# [plugins.fzf-tab]
-# github = "Aloxaf/fzf-tab"
+# [plugins.zsh-autocomplete]
 # apply = ["defer"]
+# github = "marlonrichert/zsh-autocomplete"
 
 [plugins.zsh-autosuggestions]
 apply = ["defer"]
@@ -54,12 +63,13 @@ use = ["{{ name }}.zsh"]
 
 [plugins.zsh-history-substring-search]
 github = "zsh-users/zsh-history-substring-search"
+apply = ["defer"]
 
-# [plugins.zsh-syntax-highlighting]
-# github = "zsh-users/zsh-syntax-highlighting"
+[plugins.zsh-syntax-highlighting]
+github = "zsh-users/zsh-syntax-highlighting"
 
-[plugins.fast-syntax-highlighting]
-github = "zdharma-continuum/fast-syntax-highlighting"
+# [plugins.fast-syntax-highlighting]
+# github = "zdharma-continuum/fast-syntax-highlighting"
 
 [plugins.alias-tips]
 apply = ["defer"]
@@ -72,3 +82,9 @@ github = "zshzoo/cd-ls"
 [plugins.zsh-eza]
 apply = ["defer"]
 github = "z-shell/zsh-eza"
+
+[plugins.enhancd]
+github = "b4b4r07/enhancd"
+
+[plugins.fzf-history-search]
+github = 'joshskidmore/zsh-fzf-history-search'
