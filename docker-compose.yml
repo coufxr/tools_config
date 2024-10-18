@@ -1,20 +1,30 @@
-version: '3.8'
 services:
   mysql:
-    user: "1000"  # 规避权限问题 wsl 用户的id
     image: mysql:latest
     container_name: mysql
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=nguc
-      - MYSQL_USER=iris
-      - MYSQL_PASSWORD=123123
       - TZ=Asia/Shanghai
     ports:
       - "3306:3306"
     volumes:
       - ./mysql_data:/var/lib/mysql
-    privileged: true # 启用特权模式
+    # user: "1000" # 规避权限问题 wsl 用户的id
+    # privileged: true # 启用特权模式
+    restart: unless-stopped
+
+  postgresql:
+    image: postgres:latest
+    container_name: postgresql
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: nguc
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    volumes:
+      - ./postgres_data/:/var/lib/postgresql/data/
     restart: unless-stopped
 
   redis:
@@ -37,7 +47,7 @@ services:
       - "9848:9848"
       - "10848:10848"
     volumes:
-    - ./rnacos_data/:/io:rw
+      - ./rnacos_data/:/io:rw
     environment:
       - RNACOS_INIT_ADMIN_USERNAME=admin
       - RNACOS_INIT_ADMIN_PASSWORD=admin
@@ -45,6 +55,16 @@ services:
       - TZ=Asia/Shanghai
     restart: unless-stopped
 
+  # opentelemetry OTLP相关
+  aspire:
+    container_name: aspire
+    image: mcr.microsoft.com/dotnet/nightly/aspire-dashboard:8.2
+    ports:
+      - "18888:18888"
+      - "4317:18889"
+    environment:
+      - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true
+    restart: unless-stopped
   # 服务监控
   # uptime_kuma:
   #   image: louislam/uptime-kuma
@@ -52,7 +72,7 @@ services:
   #   ports:
   #     - "3010:3001"
   #   restart: unless-stopped
-  
+
   #  runner:
   #  image: gitlab/gitlab-runner:latest
   #  container_name: gitlab-runner
@@ -60,3 +80,4 @@ services:
   #  volumes:
   #    - ./config/gitlab-runner:/etc/gitlab-runner # 挂载配置文件
   #    - /var/run/docker.sock:/var/run/docker.sock # 如果你希望在 runner 中调用主机的 docker engine，可以在这里配置映射
+
