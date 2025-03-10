@@ -52,9 +52,9 @@ apply = ["defer"]
 apply = ["defer"]
 github = "zsh-users/zsh-completions"
 
-# [plugins.zsh-autocomplete]
-# apply = ["defer"]
-# github = "marlonrichert/zsh-autocomplete"
+[plugins.zsh-autocomplete]
+apply = ["defer"]
+github = "marlonrichert/zsh-autocomplete"
 
 [plugins.zsh-autosuggestions]
 apply = ["defer"]

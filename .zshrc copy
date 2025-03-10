@@ -9,6 +9,8 @@
 # alias la="eza --icons --long --header --all"
 # # 显示详情的同时，附带 git 状态信息
 # alias lg="eza --icons --long --header --all --git"
+export LANG=zh_CN.UTF-8
+export LANGUAGE=zh.CN:en_US
 
 # bat
 alias cat="bat"
@@ -23,12 +25,10 @@ compinit
 eval "$(starship init zsh)"
 eval "$(sheldon source)"
 
-# kubectl
-# source <(kubectl completion zsh)
+source <(kubectl completion zsh)
 
 
 # # 额外功能
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 bindkey ',' autosuggest-accept
-
