@@ -1,0 +1,112 @@
+# Template for Infisical authentication
+.infisical_auth: &infisical_auth
+  - >
+    export INFISICAL_TOKEN=$(infisical login --method=universal-auth 
+    --client-id="${INFISICAL_CLIENT_ID}" 
+    --client-secret="${INFISICAL_CLIENT_SECRET}" 
+    --domain="${INFISICAL_URL}" 
+    --silent --plain)
+
+.notify_template: &notify_template |
+  curl -X POST -H "Content-Type: application/json" \
+    -d "{
+      \"msgtype\": \"markdown\",
+      \"markdown\": {
+        \"content\": \"# <font color=\\\"warning\\\">**CI/CD构建任务通知**</font>
+  > 项目名称：<font color=\\\"comment\\\">${CI_PROJECT_NAME}</font>
+  > 项目分支：<font color=\\\"comment\\\">${CI_COMMIT_REF_NAME}</font>
+  > 提交信息：<font color=\\\"comment\\\">$(echo -n "${CI_COMMIT_MESSAGE}" | sed -z -e 's/\n/ /g' -e 's/"/\\\"/g')</font>
+  > 提交者：<font color=\\\"comment\\\">${CI_COMMIT_AUTHOR}</font>
+  > 镜像标签：<font color=\\\"comment\\\">${CI_COMMIT_SHORT_SHA}</font>
+  > 构建时间：<font color=\\\"comment\\\">$(date -d "${CI_PIPELINE_CREATED_AT}" +"%Y-%m-%d %H:%M:%S")</font>
+  > 部署环境：<font color=\\\"blue\\\">${K8S_NAMESPACE}</font>
+  > 部署日志：<font color=\\\"comment\\\">[点击查看](${CI_PIPELINE_URL})</font>
+  > 部署状态：${DEPLOY_STATUS_CONTENT}\"
+      }
+    }" \
+    "${WEBHOOK_URL}"
+
+
+stages:
+  - build
+  - deploy
+
+variables:
+  IMAGE_NAME: "${HARBOR_REGISTRY_URL}/app/${CI_PROJECT_NAME}"
+  IMAGE_TAG: "${CI_COMMIT_SHORT_SHA}"
+  PROJECT_ID: ""
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      variables:
+        ENV: "prod"
+        K8S_NAMESPACE: "prd"
+        RUNNER_TAG: "prd"
+    - if: $CI_COMMIT_BRANCH == "dev"
+      variables:
+        ENV: "dev"
+        K8S_NAMESPACE: "dev"
+        RUNNER_TAG: "default"
+
+build:
+  stage: build
+  before_script:
+    - echo "$HARBOR_PASSWORD" | docker login $HARBOR_REGISTRY_URL -u "$HARBOR_USERNAME" --password-stdin
+  script:
+    - echo "docker image name => ${IMAGE_NAME}:${IMAGE_TAG}"
+    - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+    - docker push ${IMAGE_NAME}:${IMAGE_TAG}
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      when: always
+  after_script:
+    - docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true
+  tags:
+    - $RUNNER_TAG
+
+deploy:
+  stage: deploy
+  needs:
+    - build
+  before_script:
+    - *infisical_auth
+  script:
+    - >
+      infisical export
+      --env="${ENV}"
+      --projectId="${PROJECT_ID}"
+      --domain="${INFISICAL_URL}"
+      --format=yaml | sed 's/^/  /' >> kustomize/overlays/${ENV}/configmap/web.yaml
+
+    - cat kustomize/overlays/${ENV}/configmap/web.yaml
+    - sed -i "s|<BUILD_TAG>|${IMAGE_TAG}|g" kustomize/overlays/${ENV}/kustomization.yaml
+    - cat kustomize/overlays/${ENV}/kustomization.yaml
+    # 部署至k8s
+    - kubectl apply -k kustomize/overlays/${ENV}
+    - kubectl rollout status deployment/${CI_PROJECT_NAME} -n ${K8S_NAMESPACE} --timeout=300s
+  tags:
+    - $RUNNER_TAG
+
+
+notify_success:
+  stage: .post
+  variables:
+    DEPLOY_STATUS_CONTENT: "<font color=\\\"green\\\">**Success ✅**</font>"
+  script:
+    - export WEBHOOK_URL="$WECOM_WEBHOOK_URL"
+    - *notify_template
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      when: on_success
+
+notify_failure:
+  stage: .post
+  variables:
+    DEPLOY_STATUS_CONTENT: "<font color=\\\"red\\\">**Failure ❌**</font>"
+  script:
+    - export WEBHOOK_URL="$WECOM_WEBHOOK_URL"
+    - *notify_template
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      when: on_failure
